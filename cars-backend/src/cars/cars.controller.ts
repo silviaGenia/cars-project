@@ -4,11 +4,12 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
-  Put,
+  Patch,
   Query,
 } from '@nestjs/common';
-import { CreateCarDTO, UpdateCarDTO } from './dto/car.dto';
+import { CreateCarDto, UpdateCarDto } from './dto/car.dto';
 import { Car } from './car.entity';
 import { CarsService } from './cars.service';
 
@@ -17,27 +18,35 @@ export class CarsController {
   constructor(private carService: CarsService) {}
 
   @Get()
-  async getQueryCars(@Query('color') color) {
-    return this.carService.getCarByColor(color);
+  listarCars(): Promise<Car[]> {
+    return this.carService.getCars();
   }
-  @Get()
-  async getTodosCars(): Promise<Car[]> {
-    return this.carService.getAllCars();
-  }
+
   @Get(':id')
-  async getUnCard(@Param('id') id: number): Promise<Car> {
+  obtenerCard(@Param('id', ParseIntPipe) id: number) {
     return this.carService.getCarById(id);
   }
-  @Post()
-  async crearCar(@Body() request: CreateCarDTO) {
-    return this.carService.createCar(request);
+
+  @Get()
+  getQueryCars(@Query('color') color) {
+    return this.carService.getCarByColor(color);
   }
+
+  @Post()
+  crearCar(@Body() newCar: CreateCarDto): Promise<Car> {
+    return this.carService.createCar(newCar);
+  }
+
   @Delete(':id')
-  async eliminarCar(@Param('id') id: number) {
+  eliminarCar(@Param('id', ParseIntPipe) id: number) {
     return this.carService.deleteCarById(id);
   }
-  @Put(':id')
-  async actualizarCar(@Param('id') id: number, @Body() request: UpdateCarDTO) {
-    return this.carService.updateCarById(id, request);
+
+  @Patch(':id')
+  actualizarCar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() car: UpdateCarDto,
+  ) {
+    return this.carService.updateCarById(id, car);
   }
 }

@@ -1,6 +1,6 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from 'dotenv';
-import { Car } from './cars/car.entity';
+// import { Car } from './cars/car.entity';
 config();
 
 export const dbConfig = TypeOrmModule.forRoot({
@@ -10,6 +10,7 @@ export const dbConfig = TypeOrmModule.forRoot({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DATABASE,
-  entities: [Car],
+  entities: [__dirname + '/**/*.entity{.ts,.js}'],
+  // entities: [Car],
   synchronize: true,
 });

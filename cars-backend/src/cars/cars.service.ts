@@ -1,46 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Car } from './car.entity';
 import { Repository } from 'typeorm';
+import { CreateCarDto, UpdateCarDto } from './dto/car.dto';
 
 @Injectable()
 export class CarsService {
   constructor(
     @InjectRepository(Car)
-    private carsRepository: Repository<Car>,
+    private carRepository: Repository<Car>,
   ) {}
 
-  public async getAllCars(): Promise<Car[]> {
-    return this.carsRepository.find();
+  getCars() {
+    return this.carRepository.find();
   }
 
-  public async getCarById(id: number): Promise<Car> {
-    const car = this.carsRepository.findOneBy({ id });
-    if (!car) throw new Error('Car no encontrado');
-    return car;
+  async getCarById(id: number) {
+    const carFound = await this.carRepository.findOne({
+      where: { id },
+    });
+    if (!carFound)
+      return new HttpException('¡Car no encontrado!', HttpStatus.NOT_FOUND);
+
+    return carFound;
   }
 
-  public async deleteCarById(id: number): Promise<void> {
-    await this.carsRepository.delete(id);
+  createCar(car: CreateCarDto) {
+    // Obtenemos un esquema de la entidad Car
+    const newCar = this.carRepository.create(car);
+
+    // Guardamos un registro en Car
+    return this.carRepository.save(newCar);
   }
 
-  public async createCar(car: Partial<Car>): Promise<Car> {
-    return this.carsRepository.save(car);
+  async deleteCarById(id: number) {
+    const result = await this.carRepository.delete({ id });
+
+    if (result.affected === 0) {
+      return new HttpException('¡Car no encontrado!', HttpStatus.NOT_FOUND);
+    }
+
+    return result;
   }
 
-  public async updateCarById(id: number, car: Partial<Car>) {
-    const myCar = await this.getCarById(id);
-    if (!myCar) throw new Error('Car no encontrado');
-    myCar.nombre = car.nombre;
-    myCar.modelo = car.modelo;
-    myCar.color = car.color;
-    myCar.descripcion = car.descripcion;
+  async updateCarById(id: number, car: UpdateCarDto) {
+    const carFound = await this.carRepository.findOne({
+      where: { id },
+    });
+    if (!carFound)
+      return new HttpException('¡Car no encontrado!', HttpStatus.NOT_FOUND);
 
-    return this.carsRepository.save(myCar);
+    const updateCar = Object.assign(carFound, car);
+
+    return this.carRepository.save(updateCar);
   }
 
-  public async getCarByColor(color: string): Promise<Car[]> {
-    const cars = this.carsRepository.find({ where: { color } });
+  getCarByColor(color: string) {
+    const cars = this.carRepository.find({ where: { color } });
     return cars;
   }
 }
