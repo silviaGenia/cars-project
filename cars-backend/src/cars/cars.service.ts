@@ -3,12 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Car } from './car.entity';
 import { Repository } from 'typeorm';
 import { CreateCarDto, UpdateCarDto } from './dto/car.dto';
+import { CreateUserDto } from 'src/users/dto/user.dto';
+import { User } from 'src/users/user.entity';
 
 @Injectable()
 export class CarsService {
   constructor(
     @InjectRepository(Car)
     private carRepository: Repository<Car>,
+
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   getCars() {
@@ -58,5 +63,22 @@ export class CarsService {
   getCarByColor(color: string) {
     const cars = this.carRepository.find({ where: { color } });
     return cars;
+  }
+
+  async createUser(carId: number, user: CreateUserDto) {
+    const carFound = await this.carRepository.findOne({
+      where: {
+        id: carId,
+      },
+    });
+
+    if (!carFound)
+      return new HttpException('¡Car no encontrado!', HttpStatus.NOT_FOUND);
+
+    const newUser = this.userRepository.create(user);
+    const saveUser = await this.userRepository.save(newUser);
+    carFound.user = saveUser;
+
+    return this.carRepository.save(carFound);
   }
 }

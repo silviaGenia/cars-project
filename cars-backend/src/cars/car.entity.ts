@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/users/user.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 
 @Entity({ name: 'cars' })
 export class Car {
@@ -16,4 +23,8 @@ export class Car {
 
   @Column({ default: '' })
   descripcion: string;
+
+  @OneToOne(() => User)
+  @JoinColumn()
+  user: User;
 }

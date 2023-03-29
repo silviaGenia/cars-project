@@ -1,14 +1,7 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
-import { Car } from '../cars/car.entity';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
-export class Usuario {
+export class User {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -26,8 +19,4 @@ export class Usuario {
 
   @Column({ default: '' })
   documento_identidad: string;
-
-  @OneToOne(() => Car)
-  @JoinColumn()
-  car: Car;
 }
